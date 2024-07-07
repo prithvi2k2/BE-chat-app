@@ -22,20 +22,20 @@ module.exports = () => ({
               `[io] a new client with id ${socket.id} has connected`
             );
           },
-        },
-        { name: "create-chat-session" },
-        { name: "update-chat-session" },
-        {
-          name: "get-chat-sessions",
-          handler: async ({ strapi }, socket, userId) => {
-            strapi.log.info(
-              `[io] get chat sessions request by socket ${socket.id}`
-            );
-            const entries = await strapi.entityService.findMany('api::chat-session.chat-session', {
-              populate: { "users_permissions_user": userId }, 
-            });
+        // },
+        // { name: "create-chat-session" },
+        // { name: "update-chat-session" },
+        // {
+        //   name: "get-chat-sessions",
+        //   handler: async ({ strapi }, socket, userId) => {
+        //     strapi.log.info(
+        //       `[io] get chat sessions request by socket ${socket.id}`
+        //     );
+        //     const entries = await strapi.entityService.findMany('api::chat-session.chat-session', {
+        //       populate: { "users_permissions_user": userId }, 
+        //     });
             
-          },
+        //   },
         },
       ],
     },
