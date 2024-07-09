@@ -12,6 +12,14 @@ module.exports = () => ({
   io: {
     enabled: true,
     config: {
+      socket: {
+        serverOptions: {
+          cors: {
+            origin: process.env.FRONTEND_WEB_ORIGIN,
+            methods: ["GET", "POST"],
+          },
+        },
+      },
       // This will listen for all supported events on the chat session type
       contentTypes: ["api::chat-session.chat-session"],
       events: [
@@ -22,20 +30,35 @@ module.exports = () => ({
               `[io] a new client with id ${socket.id} has connected`
             );
           },
-        // },
-        // { name: "create-chat-session" },
-        // { name: "update-chat-session" },
-        // {
-        //   name: "get-chat-sessions",
-        //   handler: async ({ strapi }, socket, userId) => {
-        //     strapi.log.info(
-        //       `[io] get chat sessions request by socket ${socket.id}`
-        //     );
-        //     const entries = await strapi.entityService.findMany('api::chat-session.chat-session', {
-        //       populate: { "users_permissions_user": userId }, 
-        //     });
-            
-        //   },
+        },
+        {
+          name: "disconnect",
+          handler: ({ strapi }, socket) => {
+            strapi.log.info(
+              `[io] a client with id ${socket.id} has DISconnected`
+            );
+          },
+        },
+        {
+          name: "message",
+          handler: async ({ strapi }, socket, sessionId, message, chatLog) => {
+            // strapi.log.info(`[io] message by socket ${socket.id}`);
+            chatLog = [...chatLog, message];
+            // Update chat log in db
+            const entries = await strapi.entityService.update(
+              "api::chat-session.chat-session",
+              sessionId, // updates the selected chat session
+              {
+                data: {
+                  // Updating chat log - Strapi doesn't support appending a single item to it for some reason
+                  // so entire log with new message is again updated
+                  chat_log: chatLog,
+                },
+              }
+            );
+            // Reply/EMITTING with same message - ECHOING
+            socket.emit("message", sessionId, chatLog);
+          },
         },
       ],
     },
