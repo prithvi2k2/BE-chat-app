@@ -17,6 +17,7 @@ module.exports = () => ({
           cors: {
             origin: process.env.FRONTEND_WEB_ORIGIN,
             methods: ["GET", "POST"],
+            credentials: true,
           },
         },
       },
